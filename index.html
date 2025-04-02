@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>D'Hondt Calculator</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				max-width: 800px;
+				margin: 0 auto;
+				padding: 20px;
+				background-color: #f5f5f5;
+			}
+			.party-container {
+				background-color: white;
+				padding: 15px;
+				margin: 10px 0;
+				border-radius: 5px;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+			}
+			.slider-container {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+			.slider {
+				flex-grow: 1;
+				height: 25px;
+			}
+			.percentage {
+				min-width: 60px;
+				text-align: right;
+			}
+			.results {
+				margin-top: 20px;
+				padding: 20px;
+				background-color: white;
+				border-radius: 5px;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+			}
+			.seat {
+				display: inline-block;
+				width: 30px;
+				height: 30px;
+				line-height: 30px;
+				text-align: center;
+				background-color: #4caf50;
+				color: white;
+				border-radius: 50%;
+				margin: 5px;
+			}
+			h1 {
+				color: #333;
+				text-align: center;
+			}
+			.total-seats {
+				font-size: 1.2em;
+				margin: 20px 0;
+				text-align: center;
+			}
+			.checkbox-container {
+				display: flex;
+				align-items: center;
+				gap: 5px;
+			}
+			.fixed {
+				opacity: 0.7;
+			}
+			.hide-btn {
+				margin-left: 10px;
+				padding: 2px 8px;
+				border: 1px solid #ccc;
+				border-radius: 3px;
+				background: #fff;
+				cursor: pointer;
+			}
+			.hide-btn:hover {
+				background: #f0f0f0;
+			}
+			.hidden {
+				opacity: 0.5;
+			}
+			.hidden .slider {
+				background-color: #eee;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>D'Hondt Calculator</h1>
+		<div class="total-seats">
+			Total Seats:
+			<input type="number" id="totalSeats" value="30" min="1" max="1000" />
+		</div>
+		<div class="results">
+			<h2>Results</h2>
+			<div id="results"></div>
+		</div>
+		<div id="parties"></div>
+
+		<script>
+			// Initial parties data
+			let parties = [
+				{ name: "La Libertad Avanza", votes: 30, color: "#FF6B6B" },
+				{ name: "Buenos Aires Primero (PRO)", votes: 25, color: "#4ECDC4" },
+				{
+					name: "Es Ahora Buenos Aires (Unión por la Patria)",
+					votes: 20,
+					color: "#45B7D1",
+				},
+				{ name: "Volvamos Buenos Aires", votes: 15, color: "#96CEB4" },
+				{ name: "Libertad y Orden (UCEDE)", votes: 10, color: "#FFEEAD" },
+				{ name: "Evolución", votes: 10, color: "#FFEEAD" },
+				{ name: "Coalición Cívica", votes: 10, color: "#FFEEAD" },
+				{
+					name: "Frente de Izquierda y los Trabajadores - Unidad",
+					votes: 10,
+					color: "#FFEEAD",
+				},
+				{ name: "Principios y Valores", votes: 10, color: "#FFEEAD" },
+				{ name: "Unidad Porteña Libertaria", votes: 10, color: "#FFEEAD" },
+				{ name: "Justa, Libre y Soberana", votes: 10, color: "#FFEEAD" },
+				{
+					name: "Confluencia por la Unidad y la Soberanía",
+					votes: 10,
+					color: "#FFEEAD",
+				},
+				{
+					name: "Movimiento de Integración y Desarrollo",
+					votes: 10,
+					color: "#FFEEAD",
+				},
+				{ name: "La Izquierda en la Ciudad", votes: 10, color: "#FFEEAD" },
+				{ name: "Frente Patriota Federal", votes: 10, color: "#FFEEAD" },
+				{ name: "Remedios para CABA", votes: 10, color: "#FFEEAD" },
+			];
+
+			function createPartyControls() {
+				const container = document.getElementById("parties");
+				container.innerHTML = "";
+
+				parties.forEach((party, index) => {
+					const div = document.createElement("div");
+					div.className = "party-container" + (party.hidden ? " hidden" : "");
+					div.innerHTML = `
+                    <div class="slider-container">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="fixed${index}" ${
+						party.fixed ? "checked" : ""
+					} 
+                                onchange="toggleFixed(${index}, this.checked)">
+                            <label>${party.name}:</label>
+                            <button onclick="toggleHidden(${index})" class="hide-btn">
+                                ${party.hidden ? "Show" : "Hide"}
+                            </button>
+                        </div>
+                        <input type="range" class="slider" min="0" max="100" value="${
+													party.votes
+												}"
+                            oninput="updateVotes(${index}, this.value)" ${
+						party.hidden ? "disabled" : ""
+					}>
+                        <span class="percentage">${
+													party.hidden ? "-" : party.votes + "%"
+												}</span>
+                    </div>
+                `;
+					container.appendChild(div);
+				});
+			}
+
+			function toggleFixed(index, isFixed) {
+				console.log(index, isFixed);
+				parties[index].fixed = isFixed;
+				const container = document.querySelectorAll(".party-container")[index];
+				if (isFixed) {
+					container.classList.add("fixed");
+				} else {
+					container.classList.remove("fixed");
+				}
+			}
+
+			function toggleHidden(index) {
+				const party = parties[index];
+				party.hidden = !party.hidden;
+
+				if (party.hidden) {
+					// When hiding, redistribute votes among non-hidden, unfixed parties
+					const oldVotes = party.votes;
+					party.votes = 0;
+
+					const activeParties = parties.filter(
+						(p, i) => !p.hidden && !p.fixed && i !== index
+					);
+					const totalActiveVotes = activeParties.reduce(
+						(sum, p) => sum + p.votes,
+						0
+					);
+
+					if (totalActiveVotes > 0) {
+						activeParties.forEach((p) => {
+							const proportion = p.votes / totalActiveVotes;
+							p.votes += oldVotes * proportion;
+						});
+					}
+				} else {
+					// When showing, give it an equal share of non-fixed votes
+					const activeParties = parties.filter((p) => !p.hidden && !p.fixed);
+					const totalNonFixedVotes =
+						100 - parties.reduce((sum, p) => sum + (p.fixed ? p.votes : 0), 0);
+					const equalShare = totalNonFixedVotes / (activeParties.length + 1);
+
+					// Adjust other non-fixed parties
+					activeParties.forEach((p) => {
+						p.votes = equalShare;
+					});
+					party.votes = equalShare;
+				}
+
+				createPartyControls();
+				calculateSeats();
+			}
+
+			function updateVotes(changedIndex, newValue) {
+				if (parties[changedIndex].hidden) return;
+
+				newValue = parseFloat(newValue);
+				const oldValue = parties[changedIndex].votes;
+
+				// Get unfixed and non-hidden parties (excluding the changed one)
+				const unfixedParties = parties.filter(
+					(party, index) =>
+						!party.fixed && !party.hidden && index !== changedIndex
+				);
+
+				if (unfixedParties.length > 0) {
+					// Calculate total fixed votes (excluding the changed party)
+					const totalFixedVotes = parties.reduce(
+						(sum, party, index) =>
+							sum + (party.fixed && index !== changedIndex ? party.votes : 0),
+						0
+					);
+
+					// Calculate maximum allowed value for the changed party
+					const maxAllowedValue = 100 - totalFixedVotes;
+					const minAllowedValue = 0;
+
+					// Constrain the new value
+					const constrainedNewValue = Math.max(
+						minAllowedValue,
+						Math.min(maxAllowedValue, newValue)
+					);
+
+					// If the value was constrained, update the slider
+					if (constrainedNewValue !== newValue) {
+						const slider = document.querySelectorAll(".slider")[changedIndex];
+						slider.value = constrainedNewValue;
+						newValue = constrainedNewValue;
+					}
+
+					// Calculate remaining percentage for unfixed parties
+					const remainingPercentage = 100 - totalFixedVotes - newValue;
+
+					// If any unfixed party has 0 votes, reset their proportions
+					const anyZeroVotes = unfixedParties.some(
+						(party) => party.votes === 0
+					);
+					if (anyZeroVotes) {
+						const equalShare = remainingPercentage / unfixedParties.length;
+						unfixedParties.forEach((party) => {
+							party.votes = equalShare;
+
+							// Update the slider and percentage display
+							const partyIndex = parties.findIndex(
+								(p) => p.name === party.name
+							);
+							const slider = document.querySelectorAll(".slider")[partyIndex];
+							const percentage =
+								document.querySelectorAll(".percentage")[partyIndex];
+							slider.value = equalShare;
+							percentage.textContent = equalShare.toFixed(1) + "%";
+						});
+					} else {
+						// Calculate total votes of unfixed parties for proportion
+						const totalUnfixedVotes = unfixedParties.reduce(
+							(sum, party) => sum + party.votes,
+							0
+						);
+
+						if (totalUnfixedVotes > 0) {
+							// Distribute the remaining percentage proportionally
+							unfixedParties.forEach((party) => {
+								const proportion = party.votes / totalUnfixedVotes;
+								const newVoteValue = remainingPercentage * proportion;
+								party.votes = newVoteValue;
+
+								// Update the slider and percentage display
+								const partyIndex = parties.findIndex(
+									(p) => p.name === party.name
+								);
+								const slider = document.querySelectorAll(".slider")[partyIndex];
+								const percentage =
+									document.querySelectorAll(".percentage")[partyIndex];
+								slider.value = newVoteValue;
+								percentage.textContent = newVoteValue.toFixed(1) + "%";
+							});
+						}
+					}
+				}
+
+				// Update the changed party's value
+				parties[changedIndex].votes = newValue;
+				document.querySelectorAll(".percentage")[changedIndex].textContent =
+					newValue.toFixed(1) + "%";
+
+				calculateSeats();
+			}
+
+			function calculateSeats() {
+				const totalSeats = parseInt(
+					document.getElementById("totalSeats").value
+				);
+				const activeParties = parties.filter((party) => !party.hidden);
+				const results = new Array(parties.length).fill(0);
+				const divisors = new Array(parties.length).fill(1);
+
+				// Calculate seats using D'Hondt method only for non-hidden parties
+				for (let seat = 0; seat < totalSeats; seat++) {
+					let maxQuotient = -1;
+					let winnerIndex = -1;
+
+					for (let i = 0; i < parties.length; i++) {
+						if (!parties[i].hidden) {
+							const quotient = parties[i].votes / divisors[i];
+							if (quotient > maxQuotient) {
+								maxQuotient = quotient;
+								winnerIndex = i;
+							}
+						}
+					}
+
+					if (winnerIndex !== -1) {
+						results[winnerIndex]++;
+						divisors[winnerIndex]++;
+					}
+				}
+
+				displayResults(results);
+			}
+
+			function displayResults(seats) {
+				const resultsDiv = document.getElementById("results");
+				resultsDiv.innerHTML = "";
+
+				parties.forEach((party, index) => {
+					if (!party.hidden) {
+						const partyDiv = document.createElement("div");
+						partyDiv.style.marginBottom = "10px";
+
+						const nameSpan = document.createElement("span");
+						nameSpan.textContent = `${party.name}: `;
+						nameSpan.style.fontWeight = "bold";
+
+						const seatsContainer = document.createElement("span");
+						for (let i = 0; i < seats[index]; i++) {
+							const seat = document.createElement("span");
+							seat.className = "seat";
+							seat.textContent = i + 1;
+							seat.style.backgroundColor = party.color;
+							seatsContainer.appendChild(seat);
+						}
+
+						partyDiv.appendChild(nameSpan);
+						partyDiv.appendChild(seatsContainer);
+						resultsDiv.appendChild(partyDiv);
+					}
+				});
+			}
+
+			// Initialize the calculator
+			createPartyControls();
+			calculateSeats();
+
+			// Add event listener for total seats input
+			document
+				.getElementById("totalSeats")
+				.addEventListener("change", calculateSeats);
+		</script>
+	</body>
+</html>

@@ -84,6 +84,22 @@
 			.hidden .slider {
 				background-color: #eee;
 			}
+			/* Custom tooltip styles */
+			.tooltip {
+				position: absolute;
+				background-color: rgba(0, 0, 0, 0.8);
+				color: white;
+				padding: 5px 10px;
+				border-radius: 4px;
+				font-size: 14px;
+				pointer-events: none;
+				z-index: 1000;
+				display: none;
+			}
+			.seat {
+				position: relative;
+				cursor: pointer;
+			}
 		</style>
 	</head>
 	<body>
@@ -101,38 +117,108 @@
 		<script>
 			// Initial parties data
 			let parties = [
-				{ name: "La Libertad Avanza", votes: 30, color: "#FF6B6B" },
-				{ name: "Buenos Aires Primero (PRO)", votes: 25, color: "#4ECDC4" },
+				{ 
+					name: "La Libertad Avanza", 
+					votes: 30, 
+					color: "#FF6B6B",
+					members: ["Manuel Adorni (Vocero Presidencial)", "Solana Pelayo", "Nicolás Pakgojz", "Andrea Freguia", "Juan Pablo Arenaza", "Lucía Montenegro", " Leonardo Seifert", "Rebeca Fleitas", "Diego Vartabedian", "Marina Kienast", "Juan Ignacio Fernández (sos re NPC bro)", "Patricia Holzman", "Marcelo Ernst"]
+				},
+				{ 
+					name: "Buenos Aires Primero (PRO)", 
+					votes: 25, 
+					color: "#4ECDC4",
+					members: ["Silvia Lospennato", "Hernán Lombardi", "Laura Alonso", "Darío Nieto", "Rocío Figueroa", "Waldo Wolff", "Victoria Morales Gorleri", "Lautaro García Batallán", "Lucía Braccia", "Ezequiel Edgrado Jarvis"]
+				},
 				{
-					name: "Es Ahora Buenos Aires (Unión por la Patria)",
+					name: "Es Ahora Buenos Aires (Unión por la Plata)",
 					votes: 20,
 					color: "#45B7D1",
+					members: ["Leandro Santoro (actual Diputado Nacional. KUKA-12)", "Claudia Negri (KUKA-12)", "Federico Mochi (KUKA-12)", "Mariana González (KUKA-12)", "Juan Pablo Modarelli (KUKA-12)", "Noemí Geminiani (KUKA-12)", "Alejandro “Pitu” Salvatierra (un chorro de mierda. KUKA-12. ¡BALA!)", "Bárbara Rossen (KUKA-12)", "Francisco Caporiccio (KUKA-12)", "Berenice Ibáñez (KUKA-12)", "Juan Manuel Olmos (KUKA-12)"]
 				},
-				{ name: "Volvamos Buenos Aires", votes: 15, color: "#96CEB4" },
-				{ name: "Libertad y Orden (UCEDE)", votes: 10, color: "#FFEEAD" },
-				{ name: "Evolución", votes: 10, color: "#FFEEAD" },
-				{ name: "Coalición Cívica", votes: 10, color: "#FFEEAD" },
+				{ 
+					name: "Volvamos Buenos Aires", 
+					votes: 15, 
+					color: "#96CEB4",
+					members: ["Horacio Rodríguez Larreta", "Guadalupe Tagliaferri", "Emma Ferrario", "Melisa Balbi", "Jorge Telerman", "Guadalupe Feresin", "Augusto Carzoglio", "Julia Rodríguez Miranda", "Gabriel Borges", "Blanca Mesistrano"]
+				},
+				{ 
+					name: "Libertad y Orden (UCEDE)", 
+					votes: 10, 
+					color: "#FFEEAD",
+					members: ["Ramiro Marra (actual Legislador Porteño)", "Nabila Michitte", "Eduardo Del Piano", "Antonella Santagada", "Facundo Velastiqui", "Abril Benegas"]
+				},
+				{ 
+					name: "Evolución", 
+					votes: 10, 
+					color: "#FFEEAD",
+					members: ["Lucille “Lula” Levy (actual Legisladora Porteña)", "Facundo Cedeira", "Jessica Barreto", "Josías Vázquez", "Manuela Ludueña Senlle", "Maximiliano Kolaczik", "Paulina Servelli", "Danel Bitchik", "Ximena Blas Alayo", "Daniel Agnone"]
+				},
+				{ 
+					name: "Coalición Cívica", 
+					votes: 10, 
+					color: "#FFEEAD",
+					members: ["Paula Oliveto (actual Legisladora Porteña)", "Fernando Sánchez", "María Pace Wells", "Federico Esswein", "Carolina Maccione Juan Francisco Rosati", "Nadia Monserrat", "Ignacio Martioda", "Mirta Cellis", "Hugo Bentivenga", "Daniela Mespledes", "Hernán Poggi"]
+				},
 				{
 					name: "Frente de Izquierda y los Trabajadores - Unidad",
 					votes: 10,
 					color: "#FFEEAD",
+					members: ["Vanina Biasi (actual Legisladora Porteña)", "Luca Bonfante", "Celeste Fierro", "Pablo Almeida", "Mercedes Trimarchi", "Jeremías Romero", "Alicia Navarro Palacios", "Alejandro Lipcovich", "Tatiana Fernández Martí", "Tomás Máscolo"]
 				},
-				{ name: "Principios y Valores", votes: 10, color: "#FFEEAD" },
-				{ name: "Unidad Porteña Libertaria", votes: 10, color: "#FFEEAD" },
-				{ name: "Justa, Libre y Soberana", votes: 10, color: "#FFEEAD" },
+				{ 
+					name: "Principios y Valores", 
+					votes: 10, 
+					color: "#FFEEAD",
+					members: ["Alejandro Kim", "Nydia Lirola", "Raúl Vázquez", "Noemí Nobrega", "Roberto Couto", "María Florencia Moreno", "Alberto Sansobrino", "María Florencia Ruiz", "Cristian Albisua", "Guillermina Macchi"]
+				},
+				{ 
+					name: "Unión Porteña Libertaria", 
+					votes: 10, 
+					color: "#FFEEAD",
+					members: ["Leandro Santoro", "Alejandra Muchart", "Yamil Santoro", "Paula Scauzillo", "Leandro Ezequiel Campelo", "Elizabeth Marquez", "Fernando Fishel Szlajen", "Laura Rivero", "Matias Rosales", "Milena Rendich", "Leo Piccioli", "Claudia Cordon", "Javier Romano", "Mayra Martinez", "Cristian Heredia", "Rosario Cisneros", "William Gibson", "Lorena Varela", "Luis Diaz De La Torre", "Liliana Dure Ortiz", "Cristian Julio Iuale", "Liliana Borysiuk", "Ignacio Falcon", "Virginia Lorenzi", "Julian Rodriguez", "Patricia Frontera", "Luis Guisbert", "Yamila Ortiz", "Ludwing Ilich Maldonado Mattos", "Alejandra Falbo"]
+				},
+				{ 
+					name: "Justa, Libre y Soberana", 
+					votes: 10, 
+					color: "#FFEEAD",
+					members: ["Juan Manuel Abal Medina", "Carolina Papaleo", "Pablo Bercovich", "Sol García"],
+					hidden: true
+				},
 				{
 					name: "Confluencia por la Unidad y la Soberanía",
 					votes: 10,
 					color: "#FFEEAD",
+					members: ["Eva Koutsovitis", "Airel Elger", "Mónica Ruejas", "Antonella Bianco", "Jonatan Baldiviezo", "Virginia González Gass", "Ignacio Cámpora"],
+					hidden: true
 				},
 				{
 					name: "Movimiento de Integración y Desarrollo",
 					votes: 10,
 					color: "#FFEEAD",
+					members: ["Ricardo Caruso Lombardi", "Sandra Lorena Saravia", "Miguel Ángel Arancio", "Agustina Villar", "Pablo César Luciano Testori Schroeder", "María del Pilar Lernoud", "Osvaldo Vega", "Andrea Radice", "Rodrigo Devita", "Valeria Young"],
+					hidden: true
 				},
-				{ name: "La Izquierda en la Ciudad", votes: 10, color: "#FFEEAD" },
-				{ name: "Frente Patriota Federal", votes: 10, color: "#FFEEAD" },
-				{ name: "Remedios para CABA", votes: 10, color: "#FFEEAD" },
+				{ 
+					name: "Nuevo MAS (La Izquierda en la Ciudad)", 
+					votes: 10, 
+					color: "#FFEEAD",
+					members: ["Federico Winokur", "Violeta Azriel Alonso", "Alejandro Leiva", "María Belén D’Ambrosio Romero", "Matías Emilio Brito", "Mariana Rueda Kramer", "Roberto Sáenz", "Marina Hidalgo Robles", "Julián Luciano", "Natacha Haeberer", "no importa total no va a entrar"],
+					hidden: true
+				},
+				{ 
+					name: "Frente Patriota Federal", 
+					votes: 10, 
+					color: "#FFEEAD",
+					members: ["César Biondini", "Verónica Cardozo", "Héctor Jaime", "Alicia Quinodoz", "Federico Rosas", "Cintia Lozada", "Daniel Zeleñenki", "Gladys Nolaszo", "Gonzalo Vives", "Gladys Auce", "Leandro Padula"],
+					hidden: true
+				},
+				{ 
+					name: "Remedios para CABA", 
+					votes: 10, 
+					color: "#FFEEAD",
+					members: ["Marcelo Peretta ('peronista libertario'... mamita... flor de vendehumo)", "Valentina Peretta Alejandre", "Federico González", "Elsa Nieto", "Nahuel Altieri", "Malvina Starker", "Roberto Fernández", "Valentina Salas", "Jorge Ferri", "María Cecilia Bonzo"],
+					hidden: true
+				},
 			];
 
 			function createPartyControls() {
@@ -352,6 +438,11 @@
 				const resultsDiv = document.getElementById("results");
 				resultsDiv.innerHTML = "";
 
+				// Create tooltip element
+				const tooltip = document.createElement("div");
+				tooltip.className = "tooltip";
+				document.body.appendChild(tooltip);
+
 				parties.forEach((party, index) => {
 					if (!party.hidden) {
 						const partyDiv = document.createElement("div");
@@ -367,6 +458,27 @@
 							seat.className = "seat";
 							seat.textContent = i + 1;
 							seat.style.backgroundColor = party.color;
+							
+							// Add hover events for tooltip
+							if (party.members && party.members[i]) {
+								seat.addEventListener("mouseenter", (e) => {
+									tooltip.textContent = `#${i + 1} ${party.members[i]}`;
+									tooltip.style.display = "block";
+									
+									// Position tooltip above the seat, accounting for scroll
+									const rect = seat.getBoundingClientRect();
+									const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+									const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+									
+									tooltip.style.left = (rect.left + scrollLeft + (rect.width / 2) - (tooltip.offsetWidth / 2)) + "px";
+									tooltip.style.top = (rect.top + scrollTop - tooltip.offsetHeight - 5) + "px";
+								});
+								
+								seat.addEventListener("mouseleave", () => {
+									tooltip.style.display = "none";
+								});
+							}
+							
 							seatsContainer.appendChild(seat);
 						}
 

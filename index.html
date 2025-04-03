@@ -108,6 +108,9 @@
 			Total Seats:
 			<input type="number" id="totalSeats" value="30" min="1" max="1000" />
 		</div>
+		<div>
+			<h3>Eleciones CABA 2025</h3>
+		</div>
 		<div class="results">
 			<h2>Results</h2>
 			<div id="results"></div>
@@ -133,7 +136,7 @@
 					name: "Es Ahora Buenos Aires (Unión por la Plata)",
 					votes: 15,
 					color: "#44E818",
-					members: ["Leandro Santoro (actual Diputado Nacional. KUKA-12)", "Claudia Negri (KUKA-12)", "Federico Mochi (KUKA-12)", "Mariana González (KUKA-12)", "Juan Pablo Modarelli (KUKA-12)", "Noemí Geminiani (KUKA-12)", "Alejandro “Pitu” Salvatierra (un chorro de mierda. KUKA-12. ¡BALA!)", "Bárbara Rossen (KUKA-12)", "Francisco Caporiccio (KUKA-12)", "Berenice Ibáñez (KUKA-12)", "Juan Manuel Olmos (KUKA-12)"]
+					members: ["Leandro Santoro (actual Diputado Nacional. KUKA-12)", "Claudia Negri (KUKA-12)", "Federico Mochi (KUKA-12)", "Mariana González (KUKA-12)", "Juan Pablo Modarelli (KUKA-12)", "Noemí Geminiani (KUKA-12)", "Alejandro 'Pitu' Salvatierra (un chorro de mierda. KUKA-12. ¡BALA!)", "Bárbara Rossen (KUKA-12)", "Francisco Caporiccio (KUKA-12)", "Berenice Ibáñez (KUKA-12)", "Juan Manuel Olmos (KUKA-12)"]
 				},
 				{ 
 					name: "Volvamos Buenos Aires", 
@@ -151,7 +154,7 @@
 					name: "Evolución", 
 					votes: 1, 
 					color: "#D63076",
-					members: ["Lucille “Lula” Levy (actual Legisladora Porteña)", "Facundo Cedeira", "Jessica Barreto", "Josías Vázquez", "Manuela Ludueña Senlle", "Maximiliano Kolaczik", "Paulina Servelli", "Danel Bitchik", "Ximena Blas Alayo", "Daniel Agnone"]
+					members: ["Lucille 'Lula' Levy (actual Legisladora Porteña)", "Facundo Cedeira", "Jessica Barreto", "Josías Vázquez", "Manuela Ludueña Senlle", "Maximiliano Kolaczik", "Paulina Servelli", "Danel Bitchik", "Ximena Blas Alayo", "Daniel Agnone"]
 				},
 				{ 
 					name: "Coalición Cívica", 
@@ -202,7 +205,7 @@
 					name: "Nuevo MAS (La Izquierda en la Ciudad)", 
 					votes: 1, 
 					color: "#E88F71",
-					members: ["Federico Winokur", "Violeta Azriel Alonso", "Alejandro Leiva", "María Belén D’Ambrosio Romero", "Matías Emilio Brito", "Mariana Rueda Kramer", "Roberto Sáenz", "Marina Hidalgo Robles", "Julián Luciano", "Natacha Haeberer", "no importa total no va a entrar"],
+					members: ["Federico Winokur", "Violeta Azriel Alonso", "Alejandro Leiva", "María Belén D'Ambrosio Romero", "Matías Emilio Brito", "Mariana Rueda Kramer", "Roberto Sáenz", "Marina Hidalgo Robles", "Julián Luciano", "Natacha Haeberer", "no importa total no va a entrar"],
 					hidden: true
 				},
 				{ 
@@ -240,14 +243,14 @@
                                 ${party.hidden ? "Show" : "Hide"}
                             </button>
                         </div>
-                        <input type="range" class="slider" min="0" max="100" value="${
+                        <input type="range" class="slider" min="0" max="100" step="0.1" value="${
 													party.votes
 												}"
                             oninput="updateVotes(${index}, this.value)" ${
 						party.hidden ? "disabled" : ""
 					}>
                         <span class="percentage">${
-													party.hidden ? "-" : party.votes + "%"
+													party.hidden ? "-" : party.votes.toFixed(1) + "%"
 												}</span>
                     </div>
                 `;

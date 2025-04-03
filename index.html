@@ -32,6 +32,33 @@
 				min-width: 60px;
 				text-align: right;
 			}
+			.percentage-controls {
+				display: flex;
+				align-items: center;
+				gap: 2px;
+				margin-left: 5px;
+			}
+			.percentage-btn {
+				width: 20px;
+				height: 20px;
+				padding: 0;
+				border: 1px solid #ccc;
+				background: #fff;
+				cursor: pointer;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 12px;
+				border-radius: 2px;
+				user-select: none; /* Prevent text selection while holding button */
+			}
+			.percentage-btn:hover {
+				background: #f0f0f0;
+			}
+			.percentage-btn:disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+			}
 			.results {
 				margin-top: 20px;
 				padding: 20px;
@@ -224,6 +251,77 @@
 				},
 			];
 
+			// Add these variables at the top of the script, after the parties array
+			let adjustmentTimer = null;
+			let initialInterval = 200; // Initial interval for first adjustment
+			let minInterval = 50; // Minimum interval after acceleration
+			let currentInterval = initialInterval;
+			let adjustmentDelta = 0.1; // amount to adjust each time
+			let currentAdjustingIndex = -1;
+			let accelerationTimer = null;
+
+			function adjustVotes(index, delta) {
+				const newValue = parties[index].votes + delta;
+				updateVotes(index, newValue);
+				
+				// Update the slider value
+				const slider = document.querySelectorAll(".slider")[index];
+				if (slider) {
+					slider.value = newValue;
+				}
+			}
+
+			// Add these new functions before createPartyControls
+			function startAdjustment(index, delta) {
+				if (parties[index].hidden) return;
+				
+				currentAdjustingIndex = index;
+				adjustmentDelta = delta;
+				currentInterval = initialInterval;
+				
+				// Initial adjustment
+				adjustVotes(index, delta);
+				
+				// Start continuous adjustment with initial interval
+				adjustmentTimer = setInterval(() => {
+					if (currentAdjustingIndex === index) {
+						adjustVotes(index, delta);
+					}
+				}, currentInterval);
+
+				// Start acceleration timer
+				accelerationTimer = setInterval(() => {
+					if (currentAdjustingIndex === index) {
+						// Gradually decrease the interval until it reaches minInterval
+						currentInterval = Math.max(minInterval, currentInterval - 10);
+						// Clear and restart the adjustment timer with new interval
+						clearInterval(adjustmentTimer);
+						adjustmentTimer = setInterval(() => {
+							if (currentAdjustingIndex === index) {
+								adjustVotes(index, delta);
+							}
+						}, currentInterval);
+					}
+				}, 200); // Accelerate every 200ms
+			}
+
+			function stopAdjustment() {
+				if (adjustmentTimer) {
+					clearInterval(adjustmentTimer);
+					adjustmentTimer = null;
+				}
+				if (accelerationTimer) {
+					clearInterval(accelerationTimer);
+					accelerationTimer = null;
+				}
+				currentAdjustingIndex = -1;
+				currentInterval = initialInterval;
+			}
+
+			// Add event listeners for the document
+			document.addEventListener('mouseup', stopAdjustment);
+			document.addEventListener('mouseleave', stopAdjustment);
+
 			function createPartyControls() {
 				const container = document.getElementById("parties");
 				container.innerHTML = "";
@@ -249,9 +347,17 @@
                             oninput="updateVotes(${index}, this.value)" ${
 						party.hidden ? "disabled" : ""
 					}>
-                        <span class="percentage">${
+                        <div class="percentage-controls">
+                            <span class="percentage">${
 													party.hidden ? "-" : party.votes.toFixed(1) + "%"
 												}</span>
+                            <button class="percentage-btn" onmousedown="startAdjustment(${index}, -0.1)" ${
+						party.hidden ? "disabled" : ""
+					}>-</button>
+                            <button class="percentage-btn" onmousedown="startAdjustment(${index}, 0.1)" ${
+						party.hidden ? "disabled" : ""
+					}>+</button>
+                        </div>
                     </div>
                 `;
 					container.appendChild(div);
@@ -503,3 +609,4 @@
 		</script>
 	</body>
 </html>
+

@@ -2,6 +2,8 @@
 
 A simple, interactive web-based calculator for simulating parliamentary seat distribution using the D'Hondt method. This tool allows users to experiment with different vote percentages and see how they translate into parliamentary seats.
 
+Live demo: [https://resilient-raindrop-5fc6a7.netlify.app/](https://resilient-raindrop-5fc6a7.netlify.app/)
+
 ## Features
 
 - **Interactive Vote Adjustment**: Use sliders to dynamically adjust vote percentages for each party
